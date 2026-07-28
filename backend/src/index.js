@@ -11,7 +11,11 @@ const app = express()
 
 
 DbConnection()
-.then()
+.then(()=>{
+    app.listen(process.env.PORT || 8000, ()=>{
+        console.log()
+    })
+})
 .catch((error)=>{
-    console.log(error)
+    
 })

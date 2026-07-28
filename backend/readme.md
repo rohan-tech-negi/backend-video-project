@@ -34,3 +34,31 @@ now a sum up of how we setup this project
 "scripts": {
     "dev": "nodemon -r dotnev /config --experimental-json-modules src/index.js"
   },
+
+
+
+
+7 - defining different ways of pasing the main index file as 
+import dotenv from "dotenv"
+
+import express from "Express"
+import DbConnection from "./db/index.js"
+
+dotenv.config({
+    path: "./env"
+})
+
+const app = express()
+
+
+
+<!-- via passing the db connection ew can also pass the app.listen -->
+DbConnection()
+.then(()=>{
+    app.listeb(process.env.PORT || 8000, ()=>{
+        console.log()
+    })
+})
+.catch((error)=>{
+    console.log(error)
+})
