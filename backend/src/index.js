@@ -11,3 +11,7 @@ const app = express()
 
 
 DbConnection()
+.then()
+.catch((error)=>{
+    console.log(error)
+})
