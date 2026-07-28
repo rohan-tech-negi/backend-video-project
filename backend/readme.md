@@ -62,3 +62,6 @@ DbConnection()
 .catch((error)=>{
     console.log(error)
 })
+
+
+8- we use app.use() mostly for middlewares and config settings
