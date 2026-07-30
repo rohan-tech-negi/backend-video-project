@@ -151,3 +151,51 @@ Cookie: token=abc123
 You can access:
 
 req.cookies.token // "abc123"
+
+
+
+11- a sample modeling of the db 
+import mongoose, {Schema} from "mongoose";
+
+const videoSchema = new Schema({
+    videoFile:{
+        type: String,
+        required: true
+    },
+    thumbnail:{
+         type: String,
+        required: true
+    },
+    title:{
+         type: String,
+        required: true
+    },
+     description:{
+         type: String,
+        required: true
+    },
+     duration:{
+         type: Number,
+        required: true
+    },
+     views:{
+         type: Number,
+        default: 0
+    },
+    isPublished:{
+        type: Boolean,
+        default: true
+    },
+    <!-- this is the foregin key stuff -->
+    owner:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ]
+    
+
+
+},{timestamps: true})
+
+export const Video = mongoose.model("Video", videoSchema)
