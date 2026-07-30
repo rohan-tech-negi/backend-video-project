@@ -199,3 +199,24 @@ const videoSchema = new Schema({
 },{timestamps: true})
 
 export const Video = mongoose.model("Video", videoSchema)
+
+
+
+
+
+12- use of videoSchema.plugin(mongooseAggregatePaginate)
+What problem does it solve?
+
+When you use Mongoose aggregate(), you don’t get built-in pagination like .find().limit().skip().
+
+So if you have:
+
+10,000 records
+and you only want 10 per page
+
+👉 You’d have to manually handle skip + limit + count.
+
+This plugin does that automatically + cleanly.
+
+<!-- this is how we apply it in schema -->
+videoSchema.plugin(mongooseAggregatePaginate)
