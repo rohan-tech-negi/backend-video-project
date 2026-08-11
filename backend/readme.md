@@ -226,13 +226,305 @@ videoSchema.plugin(mongooseAggregatePaginate)
 
 
 13 - we be working with the pre hooks and methods that can be injected in the model
+1. Your pre("save") hook
 userModel.pre("save", async function (next) {
-    if(!this.isModified("password")) return next
+    if (!this.isModified("password")) return next()
 
     this.password = bcrypt.hash(this.password, 10)
     next()
 })
 
+This hook runs automatically before a User document is saved to MongoDB.
+
+For example:
+
+const user = new User({
+    username: "rohan",
+    password: "mypassword"
+})
+
+await user.save()
+
+Before MongoDB actually saves the user, the pre("save") middleware runs.
+
+this
+
+Inside this function:
+
+this
+
+refers to the current user document.
+
+So:
+
+this.password
+
+means the password of the user currently being saved.
+
+
+
+
+2. isModified("password")
+if (!this.isModified("password")) return next()
+
+This is important.
+
+It checks:
+
+"Has the password actually changed?"
+
+Suppose you create a user:
+
+password: "hello123"
+
+The hook hashes it:
+
+hello123
+↓
+$2b$10$....
+
+Later, you update only:
+
+username: "rohan123"
+
+You don't want to hash the already-hashed password again.
+
+Without this check:
+
+hello123
+↓
+hash 1
+↓
+hash 2
+↓
+hash 3
+
+Your original password would effectively be lost.
+
+So:
+
+this.isModified("password")
+
+prevents unnecessary re-hashing.
+
+
+
+
+
+
+2. isModified("password")
+if (!this.isModified("password")) return next()
+
+This is important.
+
+It checks:
+
+"Has the password actually changed?"
+
+Suppose you create a user:
+
+password: "hello123"
+
+The hook hashes it:
+
+hello123
+↓
+$2b$10$....
+
+Later, you update only:
+
+username: "rohan123"
+
+You don't want to hash the already-hashed password again.
+
+Without this check:
+
+hello123
+↓
+hash 1
+↓
+hash 2
+↓
+hash 3
+
+Your original password would effectively be lost.
+
+So:
+
+this.isModified("password")
+
+prevents unnecessary re-hashing.
+
+
+
+
+
+
+
+4. isPasswordCorrect()
+
+You created:
+
 userSchema.methods.isPasswordCorrect = async function(password) {
     return await bcrypt.compare(password, this.password)
 }
+
+This is a custom method attached to every User document.
+
+So if you have:
+
+const user = await User.findOne({ username })
+
+you can do:
+
+const isCorrect = await user.isPasswordCorrect("userEnteredPassword")
+
+bcrypt.compare() compares:
+
+User enters:
+"hello123"
+
+        ↓
+
+bcrypt.compare()
+
+        ↓
+
+Database:
+"$2b$10$....hashed password"
+
+It returns:
+
+true
+
+or
+
+false
+
+This is how login password verification normally works.
+
+
+
+
+
+
+
+5. generateAccessToken()
+
+You have:
+
+userSchema.methods.generateAccessToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.userName,
+            fullName: this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+This creates a JWT access token.
+
+For example, after successful login:
+
+const accessToken = user.generateAccessToken()
+
+The token contains information like:
+
+{
+    _id: user._id,
+    email: user.email,
+    username: user.userName,
+    fullName: user.fullName
+}
+
+and is signed using:
+
+process.env.ACCESS_TOKEN_SECRET
+
+The expiry comes from:
+
+process.env.ACCESS_TOKEN_EXPIRY
+
+For example your .env might contain:
+
+ACCESS_TOKEN_SECRET=some_super_secret_key
+ACCESS_TOKEN_EXPIRY=15m
+
+The access token is generally used to authenticate API requests.
+
+For example:
+
+Login
+  ↓
+Username + Password
+  ↓
+Verify password
+  ↓
+Generate Access Token
+  ↓
+Client stores token
+  ↓
+Client requests protected API
+  ↓
+Server verifies token
+
+
+
+
+
+
+
+
+
+
+6. generateRefreshToken()
+
+Your second method:
+
+userSchema.methods.generateRefreshToken = function() {
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.userName,
+            fullName: this.fullName
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
+
+works similarly.
+
+But this creates a refresh token.
+
+The major idea is:
+
+Access token
+
+Short-lived:
+
+15 minutes
+30 minutes
+1 hour
+
+Used frequently for API authentication.
+
+Refresh token
+
+Longer-lived:
+
+7 days
+30 days
+90 days
+
+Used to obtain a new access token when the old one expires.
+
