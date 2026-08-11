@@ -220,3 +220,19 @@ This plugin does that automatically + cleanly.
 
 <!-- this is how we apply it in schema -->
 videoSchema.plugin(mongooseAggregatePaginate)
+
+
+
+
+
+13 - we be working with the pre hooks and methods that can be injected in the model
+userModel.pre("save", async function (next) {
+    if(!this.isModified("password")) return next
+
+    this.password = bcrypt.hash(this.password, 10)
+    next()
+})
+
+userSchema.methods.isPasswordCorrect = async function(password) {
+    return await bcrypt.compare(password, this.password)
+}
