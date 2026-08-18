@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js"
 import {asyncHandler}  from "../utils/asyncHandler.js"
 import {User} from "../models/user.model.js"
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
 
 
 const registerUser = asyncHandler(async(req,res)=>{
@@ -26,6 +27,7 @@ const registerUser = asyncHandler(async(req,res)=>{
      if (!avatarLocalPath) {
          throw new ApiError(400, "Avatar file is required")
      }
+
 
     
 })
