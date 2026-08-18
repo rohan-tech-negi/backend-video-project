@@ -41,7 +41,13 @@ const registerUser = asyncHandler(async (req, res) => {
     userName: userName.toLowerCase()
   });
 
-  const createUser = await User.findById(user._id)
+  const createUser = await User.findById(user._id).select("-password -refreshToken")
+
+  if(!createUser){
+   throw new ApiError(500, "Something went wrng while registring the user")
+  }
+
+  
 });
 
 export { registerUser };
