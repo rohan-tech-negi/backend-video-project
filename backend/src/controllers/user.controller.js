@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { APiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { userName, fullName, email, password } = req.body;
@@ -41,13 +42,18 @@ const registerUser = asyncHandler(async (req, res) => {
     userName: userName.toLowerCase()
   });
 
-  const createUser = await User.findById(user._id).select("-password -refreshToken")
+  const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
-  if(!createUser){
+  if(!createdUser){
    throw new ApiError(500, "Something went wrng while registring the user")
   }
 
-  
+  return res.status(201).json(
+   new APiResponse(200, createdUser, "created user successfully")
+  )
+
+
+
 });
 
 export { registerUser };
