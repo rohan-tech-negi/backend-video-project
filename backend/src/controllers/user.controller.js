@@ -6,7 +6,15 @@ import { APiResponse } from "../utils/ApiResponse.js";
 
 const generateAccessAndRefereshTokens = async(userId)=>{
   try {
-    
+    const user = await User.findById(userId)
+    const accessToken = user.generateAccessToken()
+    const refereshToken = user.generateRefreshToken()
+
+    user.refereshToken = refereshToken
+    await user.save({validateBeforeSave: false})
+
+    return {accessToken, refereshToken}
+
   } catch (error) {
     throw new ApiError(500, "Something went wrong while generating referesh and access token")
   }
