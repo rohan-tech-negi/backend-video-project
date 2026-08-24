@@ -8,7 +8,7 @@ const generateAccessAndRefereshTokens = async(userId)=>{
   try {
     
   } catch (error) {
-    
+    throw new ApiError(500, "Something went wrong while generating referesh and access token")
   }
 }
 
