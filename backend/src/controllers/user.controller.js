@@ -122,6 +122,7 @@ const loginUser  = asyncHandler(async(req,res)=>{
 })
 
 const logoutUser = asyncHandler(async(req,res)=>{
-  
+    // for the logout logic we just have to remove the refreshtoken like the tokens stored in the web
+    
 })
 export { registerUser , loginUser};
