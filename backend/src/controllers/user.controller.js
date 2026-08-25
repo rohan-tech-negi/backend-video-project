@@ -8,12 +8,12 @@ const generateAccessAndRefereshTokens = async(userId)=>{
   try {
     const user = await User.findById(userId)
     const accessToken = user.generateAccessToken()
-    const refereshToken = user.generateRefreshToken()
+    const refreshToken = user.generateRefreshToken()
 
-    user.refereshToken = refereshToken
+    user.refereshToken = refreshToken
     await user.save({validateBeforeSave: false})
 
-    return {accessToken, refereshToken}
+    return {accessToken, refreshToken}
 
   } catch (error) {
     throw new ApiError(500, "Something went wrong while generating referesh and access token")
@@ -97,7 +97,7 @@ const loginUser  = asyncHandler(async(req,res)=>{
     throw new ApiError(401, "Invalid user credentials")
   }
 
-  const {accessToken, refereshToken} = await generateAccessAndRefereshTokens(user._id)
+  const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
 
   const loggedInUser = await User.findById(user._id).select("-password -refershToken")
 
@@ -106,8 +106,17 @@ const loginUser  = asyncHandler(async(req,res)=>{
     secure: true
   }
 
-  
+  return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", options).json(
+    new APiResponse(
+      200,
+      {
+        user: loggedInUser, accessToken, refreshToken
+      },
+      "User loggedin successfully"
+    )
+  )
 
+  
 
 
 })
