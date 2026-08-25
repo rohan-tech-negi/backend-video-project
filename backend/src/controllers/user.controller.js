@@ -97,7 +97,16 @@ const loginUser  = asyncHandler(async(req,res)=>{
     throw new ApiError(401, "Invalid user credentials")
   }
 
-  generateAccessAndRefereshTokens(user._id)
+  const {accessToken, refereshToken} = await generateAccessAndRefereshTokens(user._id)
+
+  const loggedInUser = await User.findById(user._id).select("-password -refershToken")
+
+  const options = {
+    httpOnly: true,
+    secure: true
+  }
+
+  
 
 
 
