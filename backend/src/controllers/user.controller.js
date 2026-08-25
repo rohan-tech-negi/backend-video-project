@@ -123,6 +123,21 @@ const loginUser  = asyncHandler(async(req,res)=>{
 
 const logoutUser = asyncHandler(async(req,res)=>{
     // for the logout logic we just have to remove the refreshtoken like the tokens stored in the web
-     
+     User.findByIdAndUpdate(
+      req.user._id,{
+        $set:{
+          refereshToken: undefined
+        }
+      },{
+        new : true
+      }
+     )
+
+     const options = {
+      httpOnly: true,
+      secure: true
+     }
+
+     return res.status(200).clearCookie("accessToken", options).clearCookie("refreshToken",options).json(new APiResponse(200, {}, "User logged out"))
 })
-export { registerUser , loginUser};
+export { registerUser , loginUser, logoutUser};
